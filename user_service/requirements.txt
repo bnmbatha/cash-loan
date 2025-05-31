@@ -8,3 +8,4 @@ passlib[bcrypt]
 alembic
 httpx
 boto3
+python-jose
