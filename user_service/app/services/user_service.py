@@ -2,6 +2,9 @@ from sqlalchemy.orm import Session
 from app.schemas.user import UserCreate
 from app.db.models.user import User
 from passlib.context import CryptContext
+from fastapi import APIRouter
+
+router = APIRouter()
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
