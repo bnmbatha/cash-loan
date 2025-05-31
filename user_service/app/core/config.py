@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 def get_secret():
-    secret_name = os.getenv("AWS_SECRET_NAME", "cashloan/user_service/config")
+    secret_name = os.getenv("AWS_SECRET_NAME", "cashloan/user_service/config2")
     region_name = os.getenv("AWS_REGION", "eu-central-1")
 
     client = boto3.client("secretsmanager", region_name=region_name)
@@ -14,15 +14,15 @@ def get_secret():
     secret = get_secret_value_response["SecretString"]
     return json.loads(secret)
 
-# Load secrets
+# Load secrets from AWS
 aws_secret = get_secret()
 
 class Settings:
-    DB_HOST: str = os.getenv("DB_HOST", "localhost")
-    DB_PORT: str = os.getenv("DB_PORT", "5432")
-    DB_USER: str = os.getenv("DB_USER", "postgres")
-    DB_PASSWORD: str = os.getenv("DB_PASSWORD", "yourpassword")
-    DB_NAME: str = os.getenv("DB_NAME", "cash_loans_db")
+    DB_HOST: str = aws_secret.get("DB_HOST")
+    DB_PORT: str = aws_secret.get("DB_PORT", "5432")
+    DB_USER: str = aws_secret.get("DB_USER")
+    DB_PASSWORD: str = aws_secret.get("DB_PASSWORD")
+    DB_NAME: str = aws_secret.get("DB_NAME")
     SECRET_KEY: str = aws_secret.get("SECRET_KEY", "fallback-key")
 
     @property
