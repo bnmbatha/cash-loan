@@ -24,3 +24,21 @@ def get_user(user_id: int, db: Session = Depends(get_db)):
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return user
+
+@router.put("/{user_id}", response_model=UserOut)
+def update_user(user_id: int, updated_data: UserUpdate, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    if updated_data.full_name:
+        user.full_name = updated_data.full_name
+    if updated_data.email:
+        user.email = updated_data.email
+    if updated_data.password:
+        user.hashed_password = get_password_hash(updated_data.password)
+
+    db.commit()
+    db.refresh(user)
+    return user
+
