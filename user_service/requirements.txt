@@ -1,0 +1,9 @@
+fastapi
+uvicorn[standard]
+sqlalchemy
+psycopg2-binary
+python-dotenv
+pydantic
+passlib[bcrypt]
+alembic         # DB migrations (recommended)
+httpx           # For API testing (optional)
