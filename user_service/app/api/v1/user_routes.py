@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.db.session import SessionLocal
-from app.schemas.user import UserCreate, UserOut
-from app.services.user_service import create_user
-from fastapi import HTTPException
+from app.db.models.user import User
+from app.schemas.user import UserCreate, UserOut, UserUpdate
+from app.services.user_service import create_user, get_password_hash, verify_email_token
 
 router = APIRouter()
 
@@ -51,5 +51,10 @@ def delete_user(user_id: int, db: Session = Depends(get_db)):
     db.delete(user)
     db.commit()
     return {"message": "User deleted successfully"}
+
+@router.get("/verify/{token}")
+def verify_email(token: str, db: Session = Depends(get_db)):
+    return verify_email_token(token, db)
+
 
 
