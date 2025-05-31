@@ -10,5 +10,10 @@ class UserOut(BaseModel):
     full_name: str
     email: EmailStr
 
+class UserUpdate(BaseModel):
+    full_name: Optional[str] = None
+    email: Optional[EmailStr] = None
+    password: Optional[str] = None
+
     class Config:
         orm_mode = True
