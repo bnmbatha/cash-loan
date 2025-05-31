@@ -9,3 +9,4 @@ alembic
 httpx
 boto3
 python-jose
+python-multipart
