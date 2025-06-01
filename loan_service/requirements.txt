@@ -4,3 +4,15 @@ sqlalchemy
 psycopg2-binary
 python-dotenv
 pydantic-settings
+fastapi
+uvicorn[standard]
+sqlalchemy
+psycopg2-binary
+python-dotenv
+pydantic[email]
+passlib[bcrypt]
+alembic
+httpx
+boto3
+python-jose
+python-multipart
