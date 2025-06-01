@@ -16,6 +16,40 @@ def get_db():
     finally:
         db.close()
 
+class PasswordReset(BaseModel):
+    token: str
+    new_password: str
+
+@router.post("/reset-password")
+def reset_password(data: PasswordReset, db: Session = Depends(get_db)):
+    try:
+        payload = jwt.decode(data.token, settings.SECRET_KEY, algorithms=["HS256"])
+        email = payload.get("sub")
+    except JWTError:
+        raise HTTPException(status_code=400, detail="Invalid or expired token")
+    
+    user = db.query(User).filter(User.email == email).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    user.hashed_password = get_password_hash(data.new_password)
+    db.commit()
+    return {"message": "Password reset successful"}
+
+@router.post("/forgot-password")
+def forgot_password(request: Request, email: EmailStr = Body(...), db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email == email).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    token = generate_reset_token(email)
+    reset_url = f"{request.base_url}reset-password?token={token}"
+    
+    # TODO: Send `reset_url` via email (SMTP or third-party service)
+    print("🔗 Reset Link:", reset_url)
+    
+    return {"message": "Password reset link has been generated. Check your email."}
+
 @router.post("/register", response_model=UserOut)
 def register(user: UserCreate, db: Session = Depends(get_db)):
     return create_user(db, user)
