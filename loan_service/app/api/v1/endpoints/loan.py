@@ -5,6 +5,8 @@ from app.schemas.loan import LoanCreate, LoanOut
 from app.db.models.loan import Loan
 from fastapi import APIRouter, Depends
 from common_libs.auth.dependencies import get_current_user
+from app.db.session import Base
+
 
 router = APIRouter()
 
