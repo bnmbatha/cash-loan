@@ -10,7 +10,7 @@ from app.db.session import Base
 
 router = APIRouter()
 
-@router.post("/apply")
+@router.post("/apply", operation_id="submit_loan_application")
 def apply_for_loan(loan: LoanCreate, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
     user_id = current_user["user_id"]
     ...
