@@ -9,6 +9,13 @@ from app.core.config import settings
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+RESET_TOKEN_EXPIRE_MINUTES = 30
+
+def generate_reset_token(email: str):
+    expire = datetime.utcnow() + timedelta(minutes=RESET_TOKEN_EXPIRE_MINUTES)
+    payload = {"sub": email, "exp": expire}
+    return jwt.encode(payload, settings.SECRET_KEY, algorithm="HS256")
+
 def get_password_hash(password):
     return pwd_context.hash(password)
 
