@@ -1,6 +1,8 @@
 from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime
+from app.db.session import Base
+
 
 class LoanCreate(BaseModel):
     user_id: int
