@@ -6,6 +6,7 @@ from app.schemas.user import UserCreate, UserOut, UserUpdate
 from app.services.user_service import create_user, get_password_hash, verify_email_token
 from fastapi.security import OAuth2PasswordRequestForm
 from app.core.auth import authenticate_user, create_access_token, get_current_user
+from pydantic import BaseModel
 
 router = APIRouter()
 
