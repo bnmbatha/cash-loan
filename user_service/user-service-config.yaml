@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: user-service-config
+data:
+  DB_HOST: cash-loans-db.cre6caycu1pt.eu-central-1.rds.amazonaws.com
+  DB_PORT: "5432"
+  DB_USER: postgres
+  DB_NAME: cash-loans-db
+  AWS_REGION: eu-central-1
+  AWS_SECRET_NAME: cash-loan/user_service/config2
