@@ -16,3 +16,4 @@ httpx
 boto3
 python-jose
 python-multipart
+python-jose[cryptography]
