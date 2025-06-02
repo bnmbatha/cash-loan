@@ -1,11 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Body
 from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.db.models.loan import Loan
 from app.schemas.approval import LoanApproval
 from common_libs.auth.dependencies import get_current_user
-from fastapi import Body
 from app.db.models.loan_audit_log import LoanAuditLog
+from common_libs.notifications import send_email
 
 router = APIRouter()
 
@@ -27,7 +27,6 @@ def approve_loan(
     loan.status = "approved"
     loan.approved_by = current_user["user_id"]
 
-    # ✅ Add audit log
     log = LoanAuditLog(
         loan_id=loan.id,
         action="approved",
@@ -37,7 +36,18 @@ def approve_loan(
 
     db.commit()
     db.refresh(loan)
+
+    try:
+        send_email(
+            to="client@email.com",  # ⚠️ Replace with actual email (e.g., fetched from user_service)
+            subject="Loan Approved",
+            body=f"Your loan #{loan.id} has been approved 🎉"
+        )
+    except Exception as e:
+        print(f"Email error: {e}")
+
     return {"message": "Loan approved", "loan_id": loan.id}
+
 
 @router.put("/{loan_id}/reject")
 def reject_loan(
@@ -58,7 +68,6 @@ def reject_loan(
     loan.status = "rejected"
     loan.approved_by = current_user["user_id"]
 
-    # 🔹 Add audit log entry
     log = LoanAuditLog(
         loan_id=loan.id,
         action="rejected",
@@ -69,5 +78,16 @@ def reject_loan(
 
     db.commit()
     db.refresh(loan)
+
+    try:
+        send_email(
+            to="client@email.com",  
+            subject="Loan Rejected",
+            body=f"Unfortunately, your loan #{loan.id} was rejected. Reason: {reason}"
+        )
+    except Exception as e:
+        print(f"Email error: {e}")
+
     return {"message": "Loan rejected", "loan_id": loan.id}
+
 
