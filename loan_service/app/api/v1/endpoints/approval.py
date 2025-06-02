@@ -9,19 +9,6 @@ from common_libs.notifications import send_email
 from common_libs.disbursement import disburse_funds
 from common_libs.users import get_user_email
 
-# After db.refresh(loan)
-email = get_user_email(loan.user_id)
-
-try:
-    send_email(
-        to=email,
-        subject="Loan Approved",
-        body=f"Your loan #{loan.id} has been approved 🎉"
-    )
-except Exception as e:
-    print(f"Email error: {e}")
-
-
 router = APIRouter()
 
 @router.put("/{loan_id}/approve")
@@ -42,20 +29,20 @@ def approve_loan(
     loan.status = "approved"
     loan.approved_by = current_user["user_id"]
 
-    log = LoanAuditLog(
+    db.add(LoanAuditLog(
         loan_id=loan.id,
         action="approved",
         actor_id=current_user["user_id"]
-    )
-    db.add(log)
+    ))
 
     db.commit()
     db.refresh(loan)
 
-    # ✅ Send notification
+    # ✅ Get email from user_service
     try:
+        email = get_user_email(loan.user_id)
         send_email(
-            to="client@email.com",  # 🔁 Replace with real email via user_service
+            to=email,
             subject="Loan Approved",
             body=f"Your loan #{loan.id} has been approved 🎉"
         )
@@ -94,31 +81,21 @@ def reject_loan(
     loan.status = "rejected"
     loan.approved_by = current_user["user_id"]
 
-    log = LoanAuditLog(
+    db.add(LoanAuditLog(
         loan_id=loan.id,
         action="rejected",
         actor_id=current_user["user_id"],
         reason=reason
-    )
-    db.add(log)
+    ))
 
     db.commit()
     db.refresh(loan)
 
-    email = get_user_email(loan.user_id)
-
+    # ✅ Notify user
     try:
+        email = get_user_email(loan.user_id)
         send_email(
             to=email,
-            subject="Loan Approved",
-            body=f"Your loan #{loan.id} has been approved 🎉"
-        )
-    except Exception as e:
-        print(f"Email error: {e}")
-        
-    try:
-        send_email(
-            to="client@email.com",  # 🔁 Replace with real email via user_service
             subject="Loan Rejected",
             body=f"Unfortunately, your loan #{loan.id} was rejected. Reason: {reason}"
         )
@@ -126,6 +103,3 @@ def reject_loan(
         print(f"Email error: {e}")
 
     return {"message": "Loan rejected", "loan_id": loan.id}
-
-
-
