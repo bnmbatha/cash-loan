@@ -6,6 +6,7 @@ from app.schemas.approval import LoanApproval
 from common_libs.auth.dependencies import get_current_user
 from app.db.models.loan_audit_log import LoanAuditLog
 from common_libs.notifications import send_email
+from common_libs.disbursement import disburse_funds
 
 router = APIRouter()
 
@@ -37,14 +38,25 @@ def approve_loan(
     db.commit()
     db.refresh(loan)
 
+    # ✅ Send notification
     try:
         send_email(
-            to="client@email.com",  # ⚠️ Replace with actual email (e.g., fetched from user_service)
+            to="client@email.com",  # 🔁 Replace with real email via user_service
             subject="Loan Approved",
             body=f"Your loan #{loan.id} has been approved 🎉"
         )
     except Exception as e:
         print(f"Email error: {e}")
+
+    # ✅ Auto-disburse funds
+    try:
+        disburse_funds(
+            user_id=loan.user_id,
+            amount=loan.amount,
+            loan_id=loan.id
+        )
+    except Exception as e:
+        print(f"Disbursement error: {e}")
 
     return {"message": "Loan approved", "loan_id": loan.id}
 
@@ -81,7 +93,7 @@ def reject_loan(
 
     try:
         send_email(
-            to="client@email.com",  
+            to="client@email.com",  # 🔁 Replace with real email via user_service
             subject="Loan Rejected",
             body=f"Unfortunately, your loan #{loan.id} was rejected. Reason: {reason}"
         )
@@ -89,5 +101,6 @@ def reject_loan(
         print(f"Email error: {e}")
 
     return {"message": "Loan rejected", "loan_id": loan.id}
+
 
 
