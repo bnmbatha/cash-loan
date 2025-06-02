@@ -4,6 +4,8 @@ from app.db.session import get_db
 from app.db.models.loan import Loan
 from app.schemas.approval import LoanApproval
 from common_libs.auth.dependencies import get_current_user
+from fastapi import Body
+from app.db.models.loan_audit_log import LoanAuditLog
 
 router = APIRouter()
 
@@ -24,6 +26,15 @@ def approve_loan(
 
     loan.status = "approved"
     loan.approved_by = current_user["user_id"]
+
+    # ✅ Add audit log
+    log = LoanAuditLog(
+        loan_id=loan.id,
+        action="approved",
+        actor_id=current_user["user_id"]
+    )
+    db.add(log)
+
     db.commit()
     db.refresh(loan)
     return {"message": "Loan approved", "loan_id": loan.id}
@@ -31,6 +42,7 @@ def approve_loan(
 @router.put("/{loan_id}/reject")
 def reject_loan(
     loan_id: int,
+    reason: str = Body(..., embed=True),
     current_user: dict = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
@@ -45,6 +57,16 @@ def reject_loan(
 
     loan.status = "rejected"
     loan.approved_by = current_user["user_id"]
+
+    # 🔹 Add audit log entry
+    log = LoanAuditLog(
+        loan_id=loan.id,
+        action="rejected",
+        actor_id=current_user["user_id"],
+        reason=reason
+    )
+    db.add(log)
+
     db.commit()
     db.refresh(loan)
     return {"message": "Loan rejected", "loan_id": loan.id}
