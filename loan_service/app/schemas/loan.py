@@ -2,6 +2,8 @@ from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime
 from app.db.session import Base
+from pydantic import BaseModel
+from datetime import datetime
 
 
 class LoanCreate(BaseModel):
@@ -22,6 +24,7 @@ class LoanOut(BaseModel):
     term_months: int
     interest_rate: float
     status: str
+    approved_by: int | None = None
     created_at: datetime
 
     class Config:
