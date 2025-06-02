@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     SECRET_KEY: str
     aws_region: str
     aws_secret_name: str
+    user_service_url: str
 
     class Config:
         env_file = ".env"
