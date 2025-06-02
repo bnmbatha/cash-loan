@@ -14,3 +14,15 @@ class LoanOut(LoanCreate):
     id: int
     status: str
     created_at: datetime
+
+class LoanOut(BaseModel):
+    id: int
+    user_id: int
+    amount: float
+    term_months: int
+    interest_rate: float
+    status: str
+    created_at: datetime
+
+    class Config:
+        orm_mode = True
