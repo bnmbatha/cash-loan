@@ -25,7 +25,7 @@ def apply_for_loan(
     return new_loan
 
 # ✅ Get current user's loans with pagination, filtering
-@router.get("/me")
+@router.get("/me", response_model=PaginatedLoans)
 def get_my_loans(
     current_user: dict = Depends(get_current_user),
     db: Session = Depends(get_db),
