@@ -1,37 +1,55 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
+from sqlalchemy import and_
+from typing import Optional
+from datetime import datetime
 from app.db.session import get_db
 from app.schemas.loan import LoanCreate, LoanOut
 from app.db.models.loan import Loan
-from fastapi import APIRouter, Depends
 from common_libs.auth.dependencies import get_current_user
-from app.db.session import Base
 
 router = APIRouter()
 
-@router.post("/apply", operation_id="submit_loan_application")
-def apply_for_loan(loan: LoanCreate, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+# ✅ Apply for a loan
+@router.post("/apply", response_model=LoanOut, operation_id="submit_loan_application")
+def apply_for_loan(
+    loan: LoanCreate,
+    current_user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
     user_id = current_user["user_id"]
-    ...
     new_loan = Loan(user_id=user_id, **loan.dict())
-
-@router.post("/apply", response_model=LoanOut)
-def apply_loan(loan: LoanCreate, db: Session = Depends(get_db)):
-    new_loan = Loan(**loan.dict())
     db.add(new_loan)
     db.commit()
     db.refresh(new_loan)
     return new_loan
 
-@router.get("/me", response_model=list[LoanOut])
+# ✅ Get current user's loans with pagination, filtering
+@router.get("/me")
 def get_my_loans(
     current_user: dict = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    skip: int = Query(0, ge=0),
+    limit: int = Query(10, le=100),
+    status: Optional[str] = None,
+    created_after: Optional[datetime] = None,
+    created_before: Optional[datetime] = None
 ):
-    user_id = current_user["user_id"]
-    loans = db.query(Loan).filter(Loan.user_id == user_id).all()
-    return loans
+    filters = [Loan.user_id == current_user["user_id"]]
+    if status:
+        filters.append(Loan.status == status)
+    if created_after:
+        filters.append(Loan.created_at >= created_after)
+    if created_before:
+        filters.append(Loan.created_at <= created_before)
 
+    query = db.query(Loan).filter(and_(*filters))
+    total = query.count()
+    loans = query.offset(skip).limit(limit).all()
+
+    return {"total": total, "items": loans}
+
+# ✅ Get single loan by ID
 @router.get("/{loan_id}", response_model=LoanOut)
 def get_loan_by_id(
     loan_id: int,
@@ -39,12 +57,26 @@ def get_loan_by_id(
     db: Session = Depends(get_db)
 ):
     loan = db.query(Loan).filter(Loan.id == loan_id).first()
-
     if not loan:
         raise HTTPException(status_code=404, detail="Loan not found")
-    
-    # Ensure user can only access their own loan (unless admin logic is added later)
-    if loan.user_id != current_user["user_id"]:
-        raise HTTPException(status_code=403, detail="Not authorized to view this loan")
-
+    if loan.user_id != current_user["user_id"] and current_user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Not authorized")
     return loan
+
+# ✅ Admin-only: view loans by user_id
+@router.get("/user/{user_id}")
+def get_loans_by_user_id(
+    user_id: int,
+    current_user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db),
+    skip: int = 0,
+    limit: int = 10
+):
+    if current_user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admins only")
+
+    query = db.query(Loan).filter(Loan.user_id == user_id)
+    total = query.count()
+    loans = query.offset(skip).limit(limit).all()
+    return {"total": total, "items": loans}
+
