@@ -7,6 +7,20 @@ from common_libs.auth.dependencies import get_current_user
 from app.db.models.loan_audit_log import LoanAuditLog
 from common_libs.notifications import send_email
 from common_libs.disbursement import disburse_funds
+from common_libs.users import get_user_email
+
+# After db.refresh(loan)
+email = get_user_email(loan.user_id)
+
+try:
+    send_email(
+        to=email,
+        subject="Loan Approved",
+        body=f"Your loan #{loan.id} has been approved 🎉"
+    )
+except Exception as e:
+    print(f"Email error: {e}")
+
 
 router = APIRouter()
 
@@ -91,6 +105,17 @@ def reject_loan(
     db.commit()
     db.refresh(loan)
 
+    email = get_user_email(loan.user_id)
+
+    try:
+        send_email(
+            to=email,
+            subject="Loan Approved",
+            body=f"Your loan #{loan.id} has been approved 🎉"
+        )
+    except Exception as e:
+        print(f"Email error: {e}")
+        
     try:
         send_email(
             to="client@email.com",  # 🔁 Replace with real email via user_service
