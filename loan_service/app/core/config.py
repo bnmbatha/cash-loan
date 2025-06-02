@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     user_service_url: str
 
     class Config:
+        extra = "allow"
         env_file = ".env"
 
 settings = Settings()
