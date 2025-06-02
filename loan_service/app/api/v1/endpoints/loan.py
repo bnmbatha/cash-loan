@@ -7,8 +7,6 @@ from fastapi import APIRouter, Depends
 from common_libs.auth.dependencies import get_current_user
 from app.db.session import Base
 
-
-
 router = APIRouter()
 
 @router.post("/apply", operation_id="submit_loan_application")
