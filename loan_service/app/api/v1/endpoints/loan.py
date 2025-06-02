@@ -6,41 +6,10 @@ from datetime import datetime
 from app.db.session import get_db
 from app.schemas.loan import LoanCreate, LoanOut, PaginatedLoans
 from app.db.models.loan import Loan
-from app.db.models.loan_audit_log import LoanAuditLog
 from common_libs.auth.dependencies import get_current_user
 from app.core.loan_logic import calculate_monthly_payment
-from common_libs.notifications import send_email
-from common_libs.users import get_user_email
 
 router = APIRouter()
-
-@router.put("/{loan_id}/approve")
-def approve_loan(
-    loan_id: int,
-    current_user: dict = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
-    if current_user.get("role") != "admin":
-        raise HTTPException(status_code=403, detail="Admins only")
-
-    loan = db.query(Loan).filter(Loan.id == loan_id).first()
-    if not loan:
-        raise HTTPException(status_code=404, detail="Loan not found")
-
-    loan.status = "approved"
-    db.commit()
-
-    # ✅ Now that loan exists, you can call:
-    email = get_user_email(loan.user_id)
-
-    # Optional: notify the user
-    send_email(
-        to=email,
-        subject="Your loan was approved!",
-        body=f"Hi! Your loan of {loan.amount} has been approved."
-    )
-
-    return {"message": "Loan approved and user notified"}
 
 # ✅ Apply for a loan
 @router.post("/apply", response_model=LoanOut, operation_id="submit_loan_application")
