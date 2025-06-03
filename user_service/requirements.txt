@@ -1,12 +1,12 @@
-fastapi
-uvicorn[standard]
-sqlalchemy
-psycopg2-binary
-python-dotenv
-pydantic[email]
-passlib[bcrypt]
-alembic
-httpx
-boto3
-python-jose
-python-multipart
+fastapi              # The web framework used to build APIs quickly with Python and type hints
+uvicorn[standard]    # ASGI server for running FastAPI apps in production; [standard] includes extra performance packages like 'uvloop'
+sqlalchemy           # ORM (Object Relational Mapper) used to interact with the PostgreSQL database
+psycopg2-binary      # PostgreSQL database driver used by SQLAlchemy for connecting to a Postgres DB
+python-dotenv        # Loads environment variables from a `.env` file into the application
+pydantic[email]      # Data validation and settings management using Python type annotations; [email] adds email validation support
+passlib[bcrypt]      # Used for securely hashing passwords using bcrypt
+alembic              # Database migration tool used with SQLAlchemy (e.g. version control for schema changes)
+httpx                # Async HTTP client for making external API calls (used for services like email, verification, etc.)
+boto3                # AWS SDK for Python; used to interact with AWS services like Secrets Manager or S3
+python-jose          # For handling JWT (JSON Web Tokens), used in authentication (signing/verifying tokens)
+python-multipart     # Enables FastAPI to parse `multipart/form-data` (used in file uploads, form submissions, etc.)
