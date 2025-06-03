@@ -5,7 +5,7 @@ from sqlalchemy.ext.declarative import declarative_base
 # Create a base class for declarative class definitions (used by all SQLAlchemy models)
 Base = declarative_base()
 
-# 🧑 User Model Definition
+#  User Model Definition
 # This class represents the 'users' table in the database.
 class User(Base):
     # Define the name of the table in the database
