@@ -16,7 +16,7 @@ class Repayment(Base):
     __tablename__ = "repayments"
 
     id = Column(Integer, primary_key=True, index=True)  # Unique identifier
-    loan_id = Column(Integer, ForeignKey("loans.id", ondelete="CASCADE"))  # Link to loan
+    loan_id = Column(Integer, ForeignKey("loans.id", ondelete="CASCADE"), nullable=False)  # Link to loan
     due_date = Column(DateTime, nullable=False)  # Date the repayment is due
     amount_due = Column(Float, nullable=False)  # Scheduled amount to be paid
     amount_paid = Column(Float, default=0.0)  # Actual amount paid
