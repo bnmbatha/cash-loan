@@ -6,6 +6,8 @@ import datetime  # Used to set default timestamps
 
 repayments = relationship("Repayment", back_populates="loan", cascade="all, delete-orphan")
 
+documents = relationship("Document", back_populates="loan", cascade="all, delete-orphan")
+
 # Define a model class for the "loans" table in the database
 class Loan(Base):
     # Name of the table in the database
