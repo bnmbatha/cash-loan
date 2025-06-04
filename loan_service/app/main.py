@@ -1,6 +1,9 @@
 # Import FastAPI to create the web application
 from fastapi import FastAPI
 
+# add this with your other imports
+from app.api.v1.endpoints import documents
+
 # Import routers (route definitions) for loan-related endpoints
 from app.api.v1.endpoints import loan        # Routes for applying, viewing, and listing loans
 from app.api.v1.endpoints import approval    # Routes for approving or rejecting loans
@@ -31,3 +34,5 @@ app.include_router(approval.router, prefix="/api/v1/loans", tags=["approval"])
 Base.metadata.create_all(bind=engine)
 
 app.include_router(admin_stats.router, prefix="/api/v1", tags=["Admin Analytics"])
+
+app.include_router(documents.router, prefix="/api/v1", tags=["Documents"])
