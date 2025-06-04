@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from app.api.v1.endpoints import loan        # Routes for applying, viewing, and listing loans
 from app.api.v1.endpoints import approval    # Routes for approving or rejecting loans
 from app.api.v1.endpoints import repayment   # Route for repayment
-
+from app.api.v1.endpoints import admin_stats
 
 # Import the audit log model (not directly used here but often triggers table creation)
 from app.db.models.loan_audit_log import LoanAuditLog
@@ -29,3 +29,5 @@ app.include_router(approval.router, prefix="/api/v1/loans", tags=["approval"])
 # Create all database tables defined in your models
 # This runs only once at startup and ensures tables exist in the database
 Base.metadata.create_all(bind=engine)
+
+app.include_router(admin_stats.router, prefix="/api/v1", tags=["Admin Analytics"])
