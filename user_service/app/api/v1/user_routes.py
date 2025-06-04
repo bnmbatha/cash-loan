@@ -80,8 +80,22 @@ def forgot_password(request: Request, email: EmailStr = Body(...), db: Session =
 
 # Endpoint to register a new user
 @router.post("/register", response_model=UserOut)
-def register(user: UserCreate, db: Session = Depends(get_db)):
-    return create_user(db, user)
+def register_user(user: UserCreate, db: Session = Depends(get_db)):
+    db_user = db.query(User).filter(User.email == user.email).first()
+    if db_user:
+        raise HTTPException(status_code=400, detail="Email already registered")
+
+    hashed_pw = pwd_context.hash(user.password)
+    new_user = User(
+        full_name=user.full_name,
+        email=user.email,
+        hashed_password=hashed_pw,
+        role=user.role  # 👈 Assign role
+    )
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    return new_user
 
 # Get a user by ID
 @router.get("/{user_id}", response_model=UserOut)
