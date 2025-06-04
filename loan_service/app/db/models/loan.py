@@ -39,3 +39,15 @@ class Loan(Base):
     
     paid = Column(Boolean, default=False)
 
+    # pending, under_review, reviewed
+    review_status = Column(String, default="pending")  
+
+    # User ID of reviewer
+    reviewed_by = Column(Integer, nullable=True)  
+
+    # Timestamp of review
+    reviewed_at = Column(DateTime, nullable=True)  
+
+    # Optional comment from approver
+    approval_comment = Column(Text, nullable=True)     
+
