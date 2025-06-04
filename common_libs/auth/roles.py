@@ -1,24 +1,22 @@
 from fastapi import Depends, HTTPException, status
 from common_libs.auth.dependencies import get_current_user
 
-ALLOWED_ROLES = ["admin", "agent", "customer"]
-
 def require_role(required_role: str):
-    def role_dependency(current_user=Depends(get_current_user)):
-        if current_user.get("role") != required_role:
+    def role_checker(user: dict = Depends(get_current_user)):
+        if user.get("role") != required_role:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail=f"{required_role.capitalize()}s only"
+                detail=f"Access denied: {required_role} role required"
             )
-        return current_user
-    return role_dependency
+        return user
+    return role_checker
 
 def require_roles(*roles: str):
-    def roles_dependency(current_user=Depends(get_current_user)):
-        if current_user.get("role") not in roles:
+    def role_checker(user: dict = Depends(get_current_user)):
+        if user.get("role") not in roles:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail=f"Access requires one of the following roles: {', '.join(roles)}"
+                detail=f"Access denied: one of {roles} roles required"
             )
-        return current_user
-    return roles_dependency
+        return user
+    return role_checker
