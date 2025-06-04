@@ -4,12 +4,16 @@ from fastapi import FastAPI
 # Import routers (route definitions) for loan-related endpoints
 from app.api.v1.endpoints import loan        # Routes for applying, viewing, and listing loans
 from app.api.v1.endpoints import approval    # Routes for approving or rejecting loans
+from app.api.v1.endpoints import repayment   # Route for repayment
+
 
 # Import the audit log model (not directly used here but often triggers table creation)
 from app.db.models.loan_audit_log import LoanAuditLog
 
 # Import database base class and engine for schema creation
 from app.db.session import Base, engine
+
+app.include_router(repayment.router, prefix="/api/v1/repayments", tags=["Repayments"])
 
 # Create the FastAPI application instance
 app = FastAPI(title="Loan Service")  # Title will appear in Swagger UI
