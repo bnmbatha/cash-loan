@@ -1,6 +1,7 @@
 # Import SQLAlchemy types and base class factory
 from sqlalchemy import Column, Integer, String, Boolean
 from sqlalchemy.ext.declarative import declarative_base
+from app.db.base import Base
 
 # Create a base class for declarative class definitions (used by all SQLAlchemy models)
 Base = declarative_base()
