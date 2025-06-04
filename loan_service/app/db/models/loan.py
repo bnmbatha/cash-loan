@@ -34,4 +34,6 @@ class Loan(Base):
 
     # Timestamp showing when the loan was created
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    
+    paid = Column(Boolean, default=False)
 
