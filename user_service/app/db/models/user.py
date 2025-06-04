@@ -25,3 +25,8 @@ class User(Base):
 
     # Boolean flag to check if the user's account is active (default is False)
     is_active = Column(Boolean, default=False)
+    
+    # Role field added
+    role = Column(String, nullable=False, default="customer")
+
+
