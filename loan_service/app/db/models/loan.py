@@ -4,6 +4,8 @@ from sqlalchemy.orm import relationship  # Used to define relationships between 
 from app.db.session import Base  # Import the Base class from your session config
 import datetime  # Used to set default timestamps
 
+repayments = relationship("Repayment", back_populates="loan", cascade="all, delete-orphan")
+
 # Define a model class for the "loans" table in the database
 class Loan(Base):
     # Name of the table in the database
