@@ -1,27 +1,28 @@
-# Import FastAPI tools for routing, dependencies, error handling, and query parameters
+# Import FastAPI tools for routing, dependencies, and query handling
 from fastapi import APIRouter, Depends, HTTPException, Query
 
-# SQLAlchemy tools for interacting with the database
+# SQLAlchemy tools to interact with the database
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
 
-# Standard typing utilities
-from typing import Optional, List
+# Typing and time libraries
+from typing import Optional
 from datetime import datetime
 
-# Internal modules and business logic
-from app.db.session import get_db  # Function to get a DB session
+# Import local modules and functions
+from app.db.session import get_db  # DB session provider
 from app.schemas.loan import LoanCreate, LoanOut, PaginatedLoans  # Pydantic schemas
 from app.db.models.loan import Loan  # Loan model
-from common_libs.auth.dependencies import get_current_user
-from app.core.loan_logic import calculate_monthly_payment
-from common_libs.auth.roles import require_role
+from common_libs.auth.dependencies import get_current_user  # Get authenticated user info
+from app.core.loan_logic import calculate_monthly_payment  # Business logic
+from common_libs.auth.roles import require_role  # Role-based access decorator
 
+# Define a router for loan-related endpoints
 router = APIRouter()
 
-# -----------------------------------------------
-# Endpoint to apply for a loan (POST /apply)
-# -----------------------------------------------
+# -----------------------------
+# Endpoint: Apply for a loan
+# -----------------------------
 @router.post("/apply", response_model=LoanOut, operation_id="submit_loan_application")
 def apply_for_loan(
     loan: LoanCreate,
@@ -35,9 +36,9 @@ def apply_for_loan(
     db.refresh(new_loan)
     return LoanOut.from_orm(new_loan)
 
-# -------------------------------------------------------------
-# Endpoint to fetch current user's loans (GET /me)
-# -------------------------------------------------------------
+# ---------------------------------------------------------
+# Endpoint: Get current user's loans with filtering/paging
+# ---------------------------------------------------------
 @router.get("/me", response_model=PaginatedLoans)
 def get_my_loans(
     current_user: dict = Depends(get_current_user),
@@ -76,9 +77,9 @@ def get_my_loans(
 
     return {"total": total, "items": items}
 
-# --------------------------------------------------
-# Endpoint to get loan detail (GET /{loan_id})
-# --------------------------------------------------
+# ----------------------------
+# Endpoint: Get specific loan
+# ----------------------------
 @router.get("/{loan_id}", response_model=LoanOut)
 def get_loan_by_id(
     loan_id: int,
@@ -89,6 +90,7 @@ def get_loan_by_id(
     if not loan:
         raise HTTPException(status_code=404, detail="Loan not found")
 
+    # Only the loan owner or admin can view
     if loan.user_id != current_user["user_id"] and current_user.get("role") != "admin":
         raise HTTPException(status_code=403, detail="Not authorized")
 
@@ -98,13 +100,13 @@ def get_loan_by_id(
     )
     return loan_data
 
-# --------------------------------------------------------------------
-# Admin-only endpoint to fetch loans by user ID (GET /user/{user_id})
-# --------------------------------------------------------------------
+# --------------------------------------------
+# Admin-only: Get loans for a specific user
+# --------------------------------------------
 @router.get("/user/{user_id}", response_model=PaginatedLoans)
 def get_loans_by_user_id(
     user_id: int,
-    current_user: dict = Depends(require_role("admin")),
+    current_user: dict = Depends(require_role("admin")),  # ✅ Secured
     db: Session = Depends(get_db),
     skip: int = Query(0, ge=0),
     limit: int = Query(10, le=100),
@@ -139,3 +141,4 @@ def get_loans_by_user_id(
         items.append(loan_data)
 
     return {"total": total, "items": items}
+
