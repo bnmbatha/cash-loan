@@ -7,7 +7,7 @@ from sqlalchemy import and_
 
 # Typing and time libraries
 from typing import Optional
-from datetime import datetime, timedelta
+from datetime import datetime
 
 # Import local modules and functions
 from app.db.session import get_db  # DB session provider
@@ -141,26 +141,3 @@ def get_loans_by_user_id(
         items.append(loan_data)
 
     return {"total": total, "items": items}
-
-@router.get("/calculate")
-def calculate_loan_estimate(
-    amount: float = Query(..., gt=0),
-    term_months: int = Query(..., gt=0),
-    interest_rate: float = Query(..., gt=0)
-):
-    """
-    Estimate loan monthly payment, total interest, and payoff date.
-    Publicly accessible — no authentication required.
-    """
-    monthly_payment = calculate_monthly_payment(amount, term_months, interest_rate)
-    total_payment = monthly_payment * term_months
-    total_interest = total_payment - amount
-    payoff_date = datetime.now() + timedelta(days=30 * term_months)
-
-    return {
-        "monthly_payment": round(monthly_payment, 2),
-        "total_interest": round(total_interest, 2),
-        "total_payment": round(total_payment, 2),
-        "payoff_date": payoff_date.date()
-    }
-
