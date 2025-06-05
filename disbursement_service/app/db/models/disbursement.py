@@ -2,6 +2,7 @@ from sqlalchemy import Column, Integer, Float, String, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.db.session import Base
+from app.db.base_class import Base
 
 class Disbursement(Base):
     __tablename__ = "disbursements"
