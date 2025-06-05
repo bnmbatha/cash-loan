@@ -5,6 +5,7 @@ from app.db.models.disbursement import Disbursement
 from app.schemas.disbursement import DisbursementCreate, DisbursementOut
 from datetime import datetime
 import uuid
+from typing import List
 
 router = APIRouter()
 
