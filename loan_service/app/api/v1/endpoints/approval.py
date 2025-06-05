@@ -11,28 +11,8 @@ from common_libs.auth.roles import require_role
 from common_libs.notifications import send_email
 from common_libs.disbursement import disburse_funds
 from common_libs.users import get_user_email  # Calls user_service API
-from app.db.models.repayment import Repayment
-from datetime import timedelta
-from datetime import datetime
 
 router = APIRouter()
-
-# After loan.status is set to 'approved'
-repayment_schedule = []
-monthly_amount = loan.amount / loan.term_months
-
-for i in range(loan.term_months):
-    due_date = datetime.utcnow() + timedelta(days=30 * (i + 1))
-    repayment_schedule.append(
-        Repayment(
-            loan_id=loan.id,
-            due_date=due_date,
-            amount_due=monthly_amount,
-            status="pending"
-        )
-    )
-
-db.add_all(repayment_schedule)
 
 # ------------------------
 # Admin: Approve a loan
@@ -114,22 +94,3 @@ def reject_loan(
         print(f"Email error: {e}")
 
     return {"message": "Loan rejected", "loan_id": loan.id}
-
-@router.put("/{loan_id}/review")
-def review_loan_by_agent(
-    loan_id: int,
-    comment: str = Body(..., embed=True),
-    current_user: dict = Depends(require_role("agent")),
-    db: Session = Depends(get_db)
-):
-    loan = db.query(Loan).filter(Loan.id == loan_id).first()
-    if not loan or loan.review_status != "pending":
-        raise HTTPException(status_code=400, detail="Invalid loan or already reviewed")
-    
-    loan.review_status = "under_review"
-    loan.reviewed_by = current_user["user_id"]
-    loan.reviewed_at = datetime.utcnow()
-    loan.approval_comment = comment
-
-    db.commit()
-    return {"message": "Loan reviewed by agent", "loan_id": loan.id}
