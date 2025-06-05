@@ -1,4 +1,3 @@
-# app/schemas/disbursement.py
 from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional
@@ -14,6 +13,7 @@ class DisbursementOut(DisbursementCreate):
     reference: Optional[str]
     created_at: datetime
     completed_at: Optional[datetime]
+    processed_at: datetime
 
     class Config:
         orm_mode = True
