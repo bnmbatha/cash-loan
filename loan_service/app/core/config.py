@@ -30,4 +30,3 @@ class Settings(BaseSettings):
 
 # Create an instance of the Settings class to load all environment variables
 settings = Settings()
-
