@@ -22,3 +22,17 @@ def create_disbursement(data: DisbursementCreate, db: Session = Depends(get_db))
     db.commit()
     db.refresh(disbursement)
     return disbursement
+
+router = APIRouter()
+
+@router.post("/", response_model=DisbursementOut)
+def disburse_funds(disb: DisbursementCreate, db: Session = Depends(get_db)):
+    new_disbursement = Disbursement(**disb.dict())
+    db.add(new_disbursement)
+    db.commit()
+    db.refresh(new_disbursement)
+    return new_disbursement
+
+@router.get("/loan/{loan_id}", response_model=List[DisbursementOut])
+def get_disbursements_by_loan(loan_id: int, db: Session = Depends(get_db)):
+    return db.query(Disbursement).filter(Disbursement.loan_id == loan_id).all()
